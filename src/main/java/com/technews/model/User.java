@@ -7,11 +7,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-//entity is here for us to map user to a table
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "user")
-
 public class User implements Serializable {
 
     @Id
@@ -21,21 +19,21 @@ public class User implements Serializable {
     @Column(unique = true)
     private String email;
     private String password;
-    //make sure the loggedIn status is not persisted
     @Transient
     boolean loggedIn;
 
-    @OneToMany(mappedBy = "UserId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "UserId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Need to use FetchType.LAZY to resolve multiple bags exception
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Vote> votes;
 
+    // Need to use FetchType.LAZY to resolve multiple bags exception
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
     public User() {
-
     }
 
     public User(Integer id, String username, String email, String password) {
@@ -44,6 +42,7 @@ public class User implements Serializable {
         this.email = email;
         this.password = password;
     }
+
 
     public Integer getId() {
         return id;
@@ -112,7 +111,7 @@ public class User implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof User)) return false;
         User user = (User) o;
         return isLoggedIn() == user.isLoggedIn() &&
                 Objects.equals(getId(), user.getId()) &&
@@ -127,5 +126,19 @@ public class User implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), isLoggedIn(), getPosts(), getVotes(), getComments());
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", loggedIn=" + loggedIn +
+                ", posts=" + posts +
+                ", votes=" + votes +
+                ", comments=" + comments +
+                '}';
     }
 }
